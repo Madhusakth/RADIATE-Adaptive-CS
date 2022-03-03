@@ -3,6 +3,7 @@ data/*
 vehicle_detection/weights/*
 vehicle_detection/output/*
 vehicle_detection/train_results/*
+vehicle_detection/train_results_polar/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
