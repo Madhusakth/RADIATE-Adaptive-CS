@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # RADIATE Dataset
 
 RADIATE (RAdar Dataset In Adverse weaThEr) is new automotive dataset created by Heriot-Watt University which includes Radar, Lidar, Stereo Camera and GPS/IMU.
@@ -298,3 +299,7 @@ of radar based vehicle detection in various driving scenarios and weather condit
 ![](assets/results_example.png)
 
 The code and the trained weights from radar based vehicle detection can be seen at [https://github.com/marcelsheeny/radiate_sdk/tree/master/vehicle_detection](https://github.com/marcelsheeny/radiate_sdk/tree/master/vehicle_detection)
+=======
+# RADIATE-Adaptive-CS
+Code
+>>>>>>> f00dd14eac0d9f209f3ab90b2d30ed1d102f3895
