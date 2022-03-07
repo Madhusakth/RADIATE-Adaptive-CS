@@ -1,4 +1,4 @@
-# RADIATE Dataset
+# End-to-end system for object detection from sub-sampled radar data
 
 RADIATE (RAdar Dataset In Adverse weaThEr) is new automotive dataset created by Heriot-Watt University which includes Radar, Lidar, Stereo Camera and GPS/IMU.
 
