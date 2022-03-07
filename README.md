@@ -9,17 +9,3 @@ Please refer to RADIATE repo for detailed information on how to download and use
 Once you download the radiate data into the /data folder, please run main_script.sh in vehicle_detection/src_cs folder.  
 
 
-- [RADIATE Dataset](#radiate-dataset)
-  - [Dataset size](#dataset-size)
-  - [Comparison with other datasets](#comparison-with-other-datasets)
-  - [Sensors](#sensors)
-  - [Folder Structure and File Format](#folder-structure-and-file-format)
-  - [Sensor Calibration](#sensor-calibration)
-  - [Annotation Structure](#annotation-structure)
-- [RADIATE SDK](#radiate-sdk)
-  - [Installation](#installation)
-    - [Dependencies](#dependencies)
-  - [How to use](#how-to-use)
-    - [Example:](#example)
-  - [Vehicle Detection](#vehicle-detection)
-
