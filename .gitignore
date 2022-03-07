@@ -1,8 +1,6 @@
 #folders to ignore
 
-vehicle_detection/tracker.py
-
-vehicle_detection/train.py
+vehicle_detection/tracking_branch/*
 
 data/*
 vehicle_detection/weights/*
