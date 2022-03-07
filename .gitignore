@@ -2,6 +2,7 @@
 
 vehicle_detection/tracker.py
 
+vehicle_detection/train.py
 
 data/*
 vehicle_detection/weights/*
