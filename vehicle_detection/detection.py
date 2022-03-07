@@ -121,8 +121,8 @@ def get_radar_dicts(folders):
 
 # path to the sequence
 root_path = '../data/radiate/'
-sequence_name = 'tiny_foggy' #'snow_1_0' #'tiny_foggy' night_1_4 motorway_2_2
-radar_path = '20-final-rad-info-polar-track-8/radar-cart-img' #'Navtech_Cartesian_20' #'final-rad-info' #'reconstruct/reshaped' #'Navtech_Cartesian'
+sequence_name = 'motorway_2_2' #'snow_1_0' #'tiny_foggy' night_1_4 motorway_2_2
+radar_path = '20-final-rad-info-polar-kalman-2/radar-cart-img' #'Navtech_Cartesian_20' #'final-rad-info' #'reconstruct/reshaped' #'Navtech_Cartesian'
 
 network = 'faster_rcnn_R_50_FPN_3x'
 setting = 'good_and_bad_weather_radar'

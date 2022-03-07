@@ -1,9 +1,15 @@
 #folders to ignore
+
+vehicle_detection/tracker.py
+
+
 data/*
 vehicle_detection/weights/*
 vehicle_detection/output/*
 vehicle_detection/train_results/*
 vehicle_detection/train_results_polar/*
+vehicle_detection/motorway_2_2_annotated_nw_orig/*
+vehicle_detection/tiny_foggy_annotated_nw_orig/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

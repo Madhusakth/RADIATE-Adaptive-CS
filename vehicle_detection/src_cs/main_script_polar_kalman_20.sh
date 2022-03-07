@@ -4,10 +4,10 @@ echo "-----------started processing first image-----------"
 #saveDir='/home/ms75986/Desktop/Qualcomm/Radar-Samp/Adaptive-Radar-Acquisition/data/oxford-v1/scene3/radar-pcd-data/'
 
 
+#scenes='city_3_7 night_1_4 motorway_2_2 snow_1_0 tiny_foggy'
 scenes='city_3_7 night_1_4 motorway_2_2 snow_1_0 tiny_foggy'
 
-
-folder='20-final-rad-info-polar-kalman-1'
+folder='20-final-rad-info-polar-kalman-6'
 sr=20
 for scene in $scenes
 do

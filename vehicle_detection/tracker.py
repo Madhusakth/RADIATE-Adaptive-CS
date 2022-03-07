@@ -73,8 +73,9 @@ class Tracker(): # class for Kalman Filter-based tracker
         '''
         x = self.x_state
         # Predict
-        x = dot(self.F, x)
-        self.P = dot(self.F, self.P).dot(self.F.T) + self.Q
+        
+        #x = dot(self.F, x)
+        #self.P = dot(self.F, self.P).dot(self.F.T) + self.Q
 
         #Update
         S = dot(self.H, self.P).dot(self.H.T) + self.R
@@ -93,9 +94,9 @@ class Tracker(): # class for Kalman Filter-based tracker
         x = self.x_state
         # Predict
         x = dot(self.F, x)
-        return x
+        #return x
         self.P = dot(self.F, self.P).dot(self.F.T) + self.Q
-        self.x_state = x.astype(int)
+        self.x_state = x#.astype(int)
         
 if __name__ == "__main__":
     

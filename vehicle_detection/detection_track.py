@@ -45,7 +45,7 @@ frame_count = 0 # frame counter
 max_age = 4  # no.of consecutive unmatched detection before 
              # a track is deleted
 
-min_hits =1  # no. of consecutive matches needed to establish a track
+min_hits =2  # no. of consecutive matches needed to establish a track
 
 tracker_list =[] # list for trackers
 # list for track ID
@@ -151,7 +151,7 @@ def get_radar_dicts(folders):
 
 # path to the sequence
 root_path = '../data/radiate/'
-sequence_name = 'tiny_foggy' #'snow_1_0' #'tiny_foggy' night_1_4 motorway_2_2
+sequence_name = 'night_1_4' #'snow_1_0' #'tiny_foggy' night_1_4 motorway_2_2
 radar_path = 'Navtech_Polar/radar-cart-img' #'Navtech_Cartesian_20' #'final-rad-info' #'reconstruct/reshaped' #'Navtech_Cartesian'
 
 network = 'faster_rcnn_R_50_FPN_3x'
@@ -179,6 +179,8 @@ saveDir = root_path+ sequence_name + '/' + radar_path + '_annotated_nw_orig'
 if not os.path.isdir(saveDir):
     os.mkdir(saveDir)
 
+
+vis = True
 
 #'''
 def assign_detections_to_trackers(trackers, detections, iou_thrd = 0.3):
@@ -447,18 +449,19 @@ def main():
                 #kalman.append([kf,np.array(box)])
 
                 tmp_trk = tracker.Tracker() # Create a new tracker
-                tmp_trk.R_scaler = 1.0/16
+                tmp_trk.R_scaler = 1.0#/16
                 # Update measurement noise covariance matrix
                 tmp_trk.update_R()
                 
                 x = np.array([[box[0], 0, box[1], 0, box[2]-box[0], 0, box[3]-box[1], 0]]).T
                 tmp_trk.x_state = x
-                #tmp_trk.predict_only()
+                tmp_trk.predict_only()   ####
                 xx = tmp_trk.x_state
                 xx = xx.T[0].tolist()
-                xx =[xx[0], xx[2], xx[4], xx[6]]
+                xx =[xx[0], xx[2], xx[0]+xx[4], xx[2]+xx[6]]
                 #tmp_trk.box = xx
-                kalman.append([tmp_trk,np.array(box),0,0])
+                #kalman.append([tmp_trk,np.array(box),0,0])
+                kalman.append([tmp_trk,xx,0,0])
 
 
         if t > 1:
@@ -486,13 +489,23 @@ def main():
                 if i not in box_pair:
                     unmatched_trackers.append(i)
 
+            matched_detect = []
+            matched_predict = []
             for pair in final_pair:
+
                 curr_kalman = kalman[pair[1]][0]
                 box_x = np.array(boxes[pair[0]].tensor)[0][0] + (np.array(boxes[pair[0]].tensor)[0][2] - np.array(boxes[pair[0]].tensor)[0][0])/2
                 box_y = np.array(boxes[pair[0]].tensor)[0][1] + (np.array(boxes[pair[0]].tensor)[0][3] - np.array(boxes[pair[0]].tensor)[0][1])/2
                 print("original:", np.array(boxes[pair[0]].tensor)[0][0] , np.array(boxes[pair[0]].tensor)[0][1])
                 
                 box = np.array(boxes[pair[0]].tensor)[0]
+                
+                matched_detect.append([box[0], box[1], box[2]-box[0], box[3]-box[1]])#[0]
+                predict_box = kalman[pair[1]][1]
+                matched_predict.append([predict_box[0], predict_box[1], predict_box[2]-predict_box[0], predict_box[3]-predict_box[1]])
+
+
+
                 #tmp_trk = tracker.Tracker() # Create a new tracker
                 tmp_trk = curr_kalman
                 x = np.array([[box[0], 0, box[1], 0, box[2]-box[0], 0, box[3]-box[1], 0]]).T
@@ -501,15 +514,48 @@ def main():
                 box[3] = box[3] - box[1]
                 box = np.array([box[0], box[1], box[2], box[3]])
                 tmp_trk.kalman_filter(box.T)
-                xx = tmp_trk.predict_only()
-                xx = xx.T[0].tolist()
-                xx =[xx[0], xx[2], xx[4], xx[6]]
+                #xx = tmp_trk.predict_only()
+                tmp_trk.predict_only()
+                xx = tmp_trk.x_state.T[0].tolist()
+
+                #xx = xx.T[0].tolist()
+                xx =[xx[0], xx[2], xx[0]+xx[4], xx[2]+xx[6]]
                 print("predicted:", xx)
                 #predicted = curr_kalman.predict(box_x, box_y)
                 #print("predicted:", predicted)
                 kalman[pair[1]][0] = tmp_trk
-                kalman[pair[1]][1] = np.array(boxes[pair[0]].tensor)[0]
+                #kalman[pair[1]][1] = np.array(boxes[pair[0]].tensor)[0]  #####
+                
+                kalman[pair[1]][1] = xx
+                
                 kalman[pair[1]][2] +=1
+
+
+
+            if vis:
+                matched_detect = structures.Boxes(matched_detect)
+                matched_predict = structures.Boxes(matched_predict)
+
+                detect_objects = []
+                predict_objects = []
+                for i,box in enumerate(matched_detect):
+                    detect_objects.append({'bbox': {'position': box.numpy(), 'rotation': 0}, 'class_name':'vehicle'})
+
+                for i,box in enumerate(matched_predict):
+                    predict_objects.append({'bbox': {'position': box.numpy(), 'rotation': 0}, 'class_name':'bus'})
+
+                radar = seq.vis(radar, detect_objects, color=(255,0,0))
+                radar = seq.vis(radar, predict_objects, color=(0,255,0))
+                saveDir = 'tiny_foggy_annotated_nw_orig'
+                if not os.path.isdir(saveDir):
+                    os.mkdir(saveDir)
+
+                file_name = saveDir + '/' + str(radar_id)+'.png'
+                io.imsave(file_name, radar)
+                #cv2.imshow(str(radar_id), radar)
+                #cv2.waitKey(0)
+
+
 
             for i in unmatched_trackers:
                 kalman[i][3] -=1
@@ -519,17 +565,18 @@ def main():
             for i in unmatched_detections:
                 box = np.array(boxes[i].tensor)[0]
                 tmp_trk = tracker.Tracker() # Create a new tracker
-                tmp_trk.R_scaler = 1.0/16
+                tmp_trk.R_scaler = 1.0#/16
                 # Update measurement noise covariance matrix
                 tmp_trk.update_R()
                 x = np.array([[box[0], 0, box[1], 0, box[2]-box[0], 0, box[3]-box[1], 0]]).T
                 tmp_trk.x_state = x
-                #tmp_trk.predict_only()
+                tmp_trk.predict_only()  ######
                 xx = tmp_trk.x_state
                 xx = xx.T[0].tolist()
-                xx =[xx[0], xx[2], xx[4], xx[6]]
+                xx =[xx[0], xx[2], xx[0]+xx[4], xx[2]+xx[6]]
                 #tmp_trk.box = xx
-                kalman.append([tmp_trk,np.array(boxes[i].tensor)[0],0,0])
+                #kalman.append([tmp_trk,np.array(boxes[i].tensor)[0],0,0])
+                kalman.append([tmp_trk,xx,0,0]) ####
 
             print("Kalman:", kalman)
             updated_kalman = []

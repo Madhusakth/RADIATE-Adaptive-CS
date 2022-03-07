@@ -104,7 +104,7 @@ def cart_to_polar(x,y):
     #phi = math.degrees(math.atan2(y,x)) #np.arctan2(y, x)
     return(rho, phi)
 
-
+'''
 def track_boxes(boxes,prev_boxes):
 
     IOUs = structures.pairwise_iou(boxes,prev_boxes)
@@ -146,6 +146,79 @@ def track_boxes(boxes,prev_boxes):
     print("using custom algo:", final_pair)
 
     return final_pair
+'''
+
+def euclidean(box, prev_box):
+    x_box = box[0] + (box[2]-box[0])/2
+    y_box = box[1] + (box[3]-box[1])/2
+
+    x_box_prev = prev_box[0] + (prev_box[2]-prev_box[0])/2
+    y_box_prev = prev_box[1] + (prev_box[3]-prev_box[1])/2
+
+    return np.sqrt((x_box-x_box_prev)**2+(y_box-y_box_prev)**2)
+
+def track_boxes(boxes,prev_boxes):
+
+    IOUs = structures.pairwise_iou(boxes,prev_boxes)
+    print(IOUs)
+
+    from sklearn.utils.linear_assignment_ import linear_assignment
+    matched_idxs = linear_assignment(-IOUs)
+    print(matched_idxs)
+
+    matches_final = []
+    for ele in matched_idxs:
+        if IOUs[ele[0]][ele[1]] >0:
+            matches_final.append([ele[0],ele[1]])
+    print("Using sklearn:",matches_final)
+
+    matches = []
+    for row in range(IOUs.shape[0]):
+        arg_max = int(np.argmax(IOUs[row,:]).numpy())
+        val_row = float(IOUs[row,arg_max].numpy())
+        if val_row > 0:
+            matches.append([row,arg_max,val_row])
+
+    final_matches = {}
+    for item in matches:
+        str_item = item[1]
+        if str_item not in final_matches:
+            final_matches[str_item] = [item[0],item[2]]
+
+        else:
+            if item[2] > final_matches[str_item][1]:
+                final_matches[str_item] = [item[0],item[2]]
+    print(matches)
+
+    print(final_matches)
+    
+    final_pair = []
+    for item in final_matches:
+        final_pair.append([final_matches[item][0],item])
+    print("using custom algo:", final_pair)
+
+
+    boxes = np.array(boxes.tensor)
+    prev_boxes = np.array(prev_boxes.tensor)
+    euc_box = np.zeros((len(boxes),len(prev_boxes)))
+    for i in range(len(boxes)):
+        for j in range(len(prev_boxes)):
+            euc_box[i][j] = euclidean(boxes[i],prev_boxes[j])
+
+    print(euc_box)
+    matched_idxs = linear_assignment(euc_box)
+    print(matched_idxs)
+    '''
+    matches_final = []
+    for ele in matched_idxs:
+        if euc_box[ele[0]][ele[1]] <75:
+            matches_final.append([ele[0],ele[1]])
+    print("Using sklearn and euc:",matches_final)
+    '''
+
+    #return final_pair
+    return matches_final
+
 
 def kalman_track():
     final_box = []
@@ -164,18 +237,22 @@ def kalman_track():
 
                 x = np.array([[box[0], 0, box[1], 0, box[2]-box[0], 0, box[3]-box[1], 0]]).T
                 tmp_trk.x_state = x
+                tmp_trk.predict_only()   ####
                 xx = tmp_trk.x_state
                 xx = xx.T[0].tolist()
-                xx =[xx[0], xx[2], xx[4], xx[6]]
-                kalman.append([tmp_trk,np.array(box),0,0])
+                xx =[xx[0], xx[2], xx[0]+xx[4], xx[2]+xx[6]]
+                #kalman.append([tmp_trk,np.array(box),0,0])
+                kalman.append([tmp_trk,xx,0,0]) ##
+
+                final_box.append((box,0))
 
         pickle_name = saveDir +'/'+ 'kalman.pkl'
         open_file = open(pickle_name, "wb")
         pickle.dump(kalman, open_file)
         open_file.close()
         print("**********Initialised Kalman filter*********")
-
-        return net_output
+        return final_box
+        #return net_output
 
     elif args.npy_name > 1:
         #Load the saved kalman filters 
@@ -218,11 +295,13 @@ def kalman_track():
 
         for pair in final_pair:
                 curr_kalman = kalman[pair[1]][0]
-                box_x = np.array(boxes[pair[0]].tensor)[0][0] + (np.array(boxes[pair[0]].tensor)[0][2] - np.array(boxes[pair[0]].tensor)[0][0])/2
-                box_y = np.array(boxes[pair[0]].tensor)[0][1] + (np.array(boxes[pair[0]].tensor)[0][3] - np.array(boxes[pair[0]].tensor)[0][1])/2
-                print("original:", np.array(boxes[pair[0]].tensor)[0][0] , np.array(boxes[pair[0]].tensor)[0][1])
+                #box_x = np.array(boxes[pair[0]].tensor)[0][0] + (np.array(boxes[pair[0]].tensor)[0][2] - np.array(boxes[pair[0]].tensor)[0][0])/2
+                #box_y = np.array(boxes[pair[0]].tensor)[0][1] + (np.array(boxes[pair[0]].tensor)[0][3] - np.array(boxes[pair[0]].tensor)[0][1])/2
+                #print("original:", np.array(boxes[pair[0]].tensor)[0][0] , np.array(boxes[pair[0]].tensor)[0][1])
 
-                box = np.array(boxes[pair[0]].tensor)[0]
+                #box = np.array(boxes[pair[0]].tensor)[0]
+                box = np.array(boxes.tensor)[pair[0]]
+                print("original:", box[0],box[1])
                 #tmp_trk = tracker.Tracker() # Create a new tracker
                 tmp_trk = curr_kalman
                 x = np.array([[box[0], 0, box[1], 0, box[2]-box[0], 0, box[3]-box[1], 0]]).T
@@ -231,21 +310,28 @@ def kalman_track():
                 box[3] = box[3] - box[1]
                 box = np.array([box[0], box[1], box[2], box[3]])
                 tmp_trk.kalman_filter(box.T)
-                xx = tmp_trk.predict_only()
-                xx = xx.T[0].tolist()
-                xx =[xx[0], xx[2], xx[4], xx[6]]
+                #xx = tmp_trk.predict_only()
+                #xx = xx.T[0].tolist()
+                tmp_trk.predict_only()
+                xx = tmp_trk.x_state.T[0].tolist()
+                #xx =[xx[0], xx[2], xx[4], xx[6]]
+                xx =[xx[0], xx[2], xx[0]+xx[4], xx[2]+xx[6]] ####
                 print("predicted:", xx)
                 #predicted = curr_kalman.predict(box_x, box_y)
                 #print("predicted:", predicted)
                 kalman[pair[1]][0] = tmp_trk
-                kalman[pair[1]][1] = np.array(boxes[pair[0]].tensor)[0]
+                #kalman[pair[1]][1] = np.array(boxes[pair[0]].tensor)[0]
+                #kalman[pair[1]][1] = np.array(boxes.tensor)[pair[0]] ####
+                kalman[pair[1]][1] = xx
                 kalman[pair[1]][2] +=1
 
                 if kalman[pair[1]][2] > min_tracks:
-                    final_box.append([xx[0],xx[1],xx[0]+xx[2],xx[1]+xx[3]])
+                    #final_box.append([xx[0],xx[1],xx[0]+xx[2],xx[1]+xx[3]])
+                    final_box.append(([xx[0],xx[1],xx[2],xx[3]],1))
                     print("*********using predicted position*********")
                 else:
-                    final_box.append(np.array(boxes[pair[0]].tensor)[0])
+                    #final_box.append(np.array(boxes[pair[0]].tensor)[0])
+                    final_box.append((np.array(boxes.tensor)[pair[0]],0))
                     print("*********tracked but using original**********")
 
 
@@ -262,13 +348,15 @@ def kalman_track():
                 tmp_trk.update_R()
                 x = np.array([[box[0], 0, box[1], 0, box[2]-box[0], 0, box[3]-box[1], 0]]).T
                 tmp_trk.x_state = x
-                #tmp_trk.predict_only()
+                tmp_trk.predict_only()  ####
                 xx = tmp_trk.x_state
                 xx = xx.T[0].tolist()
                 xx =[xx[0], xx[2], xx[4], xx[6]]
                 #tmp_trk.box = xx
-                kalman.append([tmp_trk,np.array(boxes[i].tensor)[0],0,0])
-                final_box.append(box)
+                #kalman.append([tmp_trk,np.array(boxes[i].tensor)[0],0,0])
+                #kalman.append([tmp_trk,np.array(boxes.tensor)[i],0,0])
+                kalman.append([tmp_trk,xx,0,0]) ####
+                final_box.append((box,0))
                 print("********using original, non-tracked*********")
 
         print("Kalman:", kalman)
@@ -298,7 +386,10 @@ def main():
     final_boxes = kalman_track()
     print(final_boxes)
 
-    for box in final_boxes:
+    for num,item in enumerate(final_boxes):
+
+        box = item[0]
+        track_on = item[1]
 
         box[2] = box[2] - box[0]
         box[3] = box[3] - box[1]
@@ -330,7 +421,18 @@ def main():
         print("x_idx,y_idx",x_idx,y_idx)
 
         if x_idx < 6 and box[2] <=50 and box[3] <=50:
+        #if box[2] <=50 and box[3] <=50:
+            #print("track_on", track_on)
             dx = dx_9
+            dy = dy_9
+
+            for x in dx:
+                for y in dy:
+                    if valid(x_idx+x, y_idx+y):
+                        objs.append(transform(x_idx+x, y_idx+y))
+        elif track_on == 1:
+            print("track_on", track_on)
+            dx = dx_25
             dy = dy_9
 
             for x in dx:
