@@ -169,7 +169,7 @@ def train(model_name, root_dir, dataset_mode, max_iter):
 
     dataset_train_name = dataset_mode + '_train'
     dataset_test_name = dataset_mode + '_test'
-    folders_train = ['city_7_0','city_1_3'] #'snow_1_0', 'night_1_4', 'motorway_2_2']#,'city_3_7']#,'city_3_7','fog_6_0','fog_8_1']
+    folders_train = ['city_7_0','city_1_3']
     folders_test = ['tiny_foggy','snow_1_0', 'night_1_4', 'motorway_2_2','city_3_7']
     dataset_test_name = 'test'
 
@@ -186,24 +186,21 @@ def train(model_name, root_dir, dataset_mode, max_iter):
     cfg_file = os.path.join('test', 'config', model_name + '.yaml')
     cfg = get_cfg()
 
-    #output_dir= '/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/vehicle_detection/train_results/fine_tune_orig_10lr_'+str(max_iter)+'iter_city_1_3/'
     output_dir='/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/vehicle_detection/train_results_polar/fine_tune_100iter_city_1_3_city_7_0_rad_'+str(total_frames)+ '/'
     os.makedirs(output_dir, exist_ok=True)
 
 
     cfg.OUTPUT_DIR = output_dir
-    #'''
     cfg.merge_from_file(cfg_file)
     cfg.DATASETS.TRAIN = (dataset_train_name,)
     cfg.DATASETS.TEST = (dataset_test_name,)
     cfg.DATALOADER.NUM_WORKERS = 2
     cfg.SOLVER.IMS_PER_BATCH = 2
-    #cfg.SOLVER.STEPS: (25000, 35000)
     cfg.SOLVER.MAX_ITER = max_iter
-    cfg.SOLVER.BASE_LR = 0.000001#0.00025*0.01#  0.000001 #0.00025*0.01# 0.000025 #0.00025 #0.00013804
+    cfg.SOLVER.BASE_LR = 0.000001
     cfg.SOLVER.CHECKPOINT_PERIOD = 1000
 
-    cfg.SOLVER.WARMUP_ITERS = 10 #100
+    cfg.SOLVER.WARMUP_ITERS = 10
 
     cfg.MODEL.WEIGHTS ='weights/faster_rcnn_R_50_FPN_3x_good_and_bad_weather_radar.pth'
 
@@ -223,28 +220,7 @@ def train(model_name, root_dir, dataset_mode, max_iter):
         trainer = Trainer(cfg)
 
     trainer.resume_or_load(resume=resume)
-    #evaluator = COCOEvaluator(dataset_test_name,cfg,False, output_dir="./output")
-    #DefaultTrainer.test(cfg=cfg, model=trainer.model, evaluators=evaluator)
     trainer.train()
-
-    '''
-
-    from detectron2.engine import DefaultPredictor
-    network = 'faster_rcnn_R_50_FPN_3x' 
-    cfg.MODEL.WEIGHTS = '/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/vehicle_detection/weights/faster_rcnn_R_50_FPN_3x_good_and_bad_weather_radar.pth' #os.path.join(cfg.OUTPUT_DIR, "model_final.pth")  # path to the model we just trained
-    cfg.merge_from_file(os.path.join('test','config' , network + '.yaml'))
-    cfg.MODEL.DEVICE = 'cpu'
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (vehicle)
-    cfg.MODEL.ROI_HEADS.NMS_THRESH_TEST = 0.2
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
-    cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[8, 16, 32, 64, 128]]
-
-    predictor = DefaultPredictor(cfg)
-    evaluator = COCOEvaluator(dataset_test_name,cfg,False, output_dir="./output")
-    val_loader = build_detection_test_loader(cfg, dataset_test_name)
-    print(inference_on_dataset(predictor.model, val_loader, evaluator))
-    '''
-
 
 if __name__ == "__main__":
     train(model_name, root_dir, dataset_mode, max_iter)

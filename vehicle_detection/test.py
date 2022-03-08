@@ -167,7 +167,7 @@ print(folders_test)
 if args.scene== 'all':
     folders_test = ['city_3_7','tiny_foggy','snow_1_0','night_1_4','motorway_2_2']
 else:
-    folders_test=[args.scene] #['city_3_7','tiny_foggy','snow_1_0','night_1_4','motorway_2_2'] #'tiny_foggy' #, 'snow_1_0' #, 'night_1_4', 'motorway_2_2','city_3_7']
+    folders_test=[args.scene]
 
 
 print("test folders:", folders_test)

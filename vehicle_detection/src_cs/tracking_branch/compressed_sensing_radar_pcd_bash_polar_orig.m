@@ -2,7 +2,8 @@
 
 function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
 
-    myDir = char(strcat('../../data/radiate/',scene));
+    %scene='city_3_7';
+    myDir = char(strcat('/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/data/radiate/',scene)); %city_3_7';
     radarDir = char(strcat(myDir,'/Navtech_Polar/'));
     saveDir= char(strcat(myDir,'/',radar_output))
     
@@ -24,6 +25,8 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
     myFiles = dir(fullfile(radarDir,'*.png'));
     baseFileName = myFiles(k).name;
     fullFileName = fullfile(radarDir, baseFileName);
+    %baseFileName = strrep(baseFileName, '.png', '.mat');
+    
 
     obj_file = myFiles(k-1).name;
     obj_file;
@@ -81,6 +84,7 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
     		prob = optimproblem('Objective' , Imp*w*h*A1 + Other*w*h*B1 ,'ObjectiveSense','max');
     		prob.Constraints.c1 = Imp*w*h*A1 + Other*w*h*B1 <= 23040;
     		prob.Constraints.c2 = A1 >= 1.1*B1;
+    		%prob.Constraints.c3 = Imp*50*50*A1 + Other*50*50*B1 >= 132000;
 
 	elseif sr==20
 		disp('20% LP conditions')
@@ -89,6 +93,7 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
                 prob = optimproblem('Objective' , Imp*w*h*A1 + Other*w*h*B1 ,'ObjectiveSense','max');
                 prob.Constraints.c1 = Imp*w*h*A1 + Other*w*h*B1 <= 46080;
                 prob.Constraints.c2 = A1 >= 1.1*B1;
+                %prob.Constraints.c3 = Imp*50*50*A1 + Other*50*50*B1 >= 132000;
 	else
 		disp('30% LP conditions')
 		A1 = optimvar('A1','LowerBound', 0.3, 'UpperBound',0.55);
@@ -96,6 +101,7 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
                 prob = optimproblem('Objective' , Imp*w*h*A1 + Other*w*h*B1 ,'ObjectiveSense','max');
                 prob.Constraints.c1 = Imp*w*h*A1 + Other*w*h*B1 <= 69120;
                 prob.Constraints.c2 = A1 >= 1.1*B1;
+                %prob.Constraints.c3 = Imp*50*50*A1 + Other*50*50*B1 >= 132000;
 	end
 
     	problem = prob2struct(prob);
@@ -142,6 +148,8 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
           end
 
             final_rate  = final_rate + rate;
+            %continue %%%%%%%%%%%%
+            %c,d,rate
             A_ = A([rows(c):rows(c+1)-1],[columns(d):columns(d+1)-1]);
             x1 = compressed_sensing_example_parallel(A_, w, h, rate,Phi); %%%%
             x1 = uint8(x1);
@@ -155,12 +163,15 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
         row_samples = [];
     end
     final_rate
+    %exit %%%%%%%%%%%%
     final_A = final_A.';
     [recons_h, recons_w] = size(final_A);
     final_A_reshaped = zeros(576,400);
     recons_h
     recons_w
     final_A_reshaped(1:recons_h,1:recons_w) = final_A;
+    %final_A_reshaped = zeros(1152,1152);
+    %final_A_reshaped(1:1150,1:1150) = final_A;
     final_A_reshaped = uint8(final_A_reshaped);
 
     

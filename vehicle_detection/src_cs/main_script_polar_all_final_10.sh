@@ -3,7 +3,6 @@ echo "-----------started processing first image-----------"
 scenes='city_3_7 night_1_4 motorway_2_2 snow_1_0 tiny_foggy'
 
 
-#scene="night_1_4"
 folder='10-final-rad-info-polar-test-4'
 sr=10
 for scene in $scenes
