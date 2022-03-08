@@ -1,6 +1,7 @@
 #folders to ignore
 
 vehicle_detection/tracking_branch/*
+vehicle_detection/src_cs/tracking_branch/*
 
 data/*
 vehicle_detection/weights/*
