@@ -4,9 +4,15 @@ In this repo, we release the code for our end-to-end sub-sampled radar data acqu
 
 In this paper, we use the RADIATE (RAdar Dataset In Adverse weaThEr) dataset released by Heriot-Watt University which includes Radar, Lidar, Stereo Camera and GPS/IMU for our experiments. 
 
-Please refer to RADIATE repo for detailed information on how to download and use the radiate sdk: https://github.com/marcelsheeny/radiate_sdk
+Please refer to RADIATE repo for detailed information on how to download the dataset and use the radiate sdk: https://github.com/marcelsheeny/radiate_sdk
 
-You can download the RADIATE data into data/ folder 
+This code for adaptive radar sampling was built on top of the radiate_sdk provided by the authors:https://arxiv.org/pdf/2010.09076.pdf
+
+
+Please download the RADIATE data into data/ folder 
+
+
+## Standard-CS 
 
 To run the baseline algorithm, Rad-Info-1 and Rad-Info-2, cd to vehicle_detection/src_cs 
 
