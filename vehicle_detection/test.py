@@ -141,8 +141,8 @@ cfg = get_cfg()
 # add project-specific config (e.g., TensorMask) here if you're not running a model in detectron2's core library
 cfg.merge_from_file(os.path.join('test','config' , network + '.yaml'))
 #cfg.MODEL.DEVICE = 'cpu'
-#cfg.MODEL.WEIGHTS = os.path.join('weights',  network +'_' + setting + '.pth')
-cfg.MODEL.WEIGHTS = 'train_results_polar/fine_tune_100iter_city_1_3_city_7_0_rad_200/model_final.pth' 
+cfg.MODEL.WEIGHTS = os.path.join('weights',  network +'_' + setting + '.pth')
+#cfg.MODEL.WEIGHTS = 'train_results_polar/fine_tune_100iter_city_1_3_city_7_0_rad_200/model_final.pth' 
 #cfg.MODEL.WEIGHTS = 'train_results/finetune_rad_000001lr_80iter_city_1_3_city_7_0/model_final.pth'
 #cfg.MODEL.WEIGHTS = 'train_results/finetune_rad_100lr_200iter_30_rad_info/model_final.pth'
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (vehicle)
