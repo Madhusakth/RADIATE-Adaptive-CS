@@ -11,8 +11,9 @@ To run the baseline algorithm, Rad-Info-1 and Rad-Info-2, cd to vehicle_detectio
 
 To run standard CS across the test cases used in the paper, for a given sampling rate, 
 modify samp_rate variable and the save_folder and run 
+```
 matlab -nodesktop -nosplash -r "run compressive_sensing_radar_radiate_polar"
-
+```
 For example, set saveDir to 10-reconstruct-standard-cs and samp_rate to 0.10 for 10% uniform sampling rate reconstruction. 
 
 Once you download the radiate data into the /data folder, please run main_script.sh in vehicle_detection/src_cs folder.  
