@@ -31,5 +31,17 @@ Finally, to run object detection on the reconstructed radar frame and obtain the
 python3 test.py --folder=$reconstruct_folder --scene=all
 ```
 
+Finetuning
+
+To generate 20% sampled radar frames as the fine-tuning set, run:
+
+```
+bash create_data_script.sh
+```
+Once the finetuning set is generated, the network can be fine-tuned using
+
+```
+python3 finetune_val.py --max_iter=100 --dataset_mode='good_and_bad_weather'
+```
 
 
