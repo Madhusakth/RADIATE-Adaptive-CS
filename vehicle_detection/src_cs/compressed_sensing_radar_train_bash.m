@@ -92,7 +92,7 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
 	else if sr==20
 		disp('20% LP conditions')
 		A1 = optimvar('A1','LowerBound', 0.2, 'UpperBound',0.55);
-                B1 = optimvar('B1','LowerBound',0.15 ,'UpperBound' ,0.2);
+                B1 = optimvar('B1','LowerBound',0.07 ,'UpperBound' ,0.2);
                 prob = optimproblem('Objective' , Imp*w*h*A1 + Other*w*h*B1 ,'ObjectiveSense','max');
                 prob.Constraints.c1 = Imp*w*h*A1 + Other*w*h*B1 <= 46080;
                 prob.Constraints.c2 = A1 >= 1.1*B1;

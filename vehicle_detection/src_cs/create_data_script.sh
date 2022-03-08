@@ -4,7 +4,7 @@ echo "-----------started processing first image-----------"
 #saveDir='/home/ms75986/Desktop/Qualcomm/Radar-Samp/Adaptive-Radar-Acquisition/data/oxford-v1/scene3/radar-pcd-data/'
 
 scene='city_7_0'
-folder='20-train_polar-reconst-test-8'
+folder='20-train_polar-reconst-test-10'
 sr=20
 
 for i in {2..100}
