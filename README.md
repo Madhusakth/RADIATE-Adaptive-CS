@@ -23,6 +23,8 @@ matlab -nodesktop -nosplash -r "run compressive_sensing_radar_radiate_polar"
 ```
 For example, set saveDir to 10-reconstruct-standard-cs and samp_rate to 0.10 for 10% uniform sampling rate reconstruction. 
 
+## Adaptive-CS
+
 To run the proposed algorithm Rad-Info-2, cd to vehicle_detection/src_cs
 
 For 10% sampling: 
@@ -30,6 +32,8 @@ For 10% sampling:
 bash main_script_polar_all_final_10.sh 
 ```
 Similarly, main_script_polar_all_final_20.sh and main_script_polar_all_final_30.sh for 20% and 30% respectively. 
+
+## Fine-tuning set generation and fine-tuning
 
 Finally, to run object detection on the reconstructed radar frame and obtain the AP results, run the following:
 
