@@ -25,7 +25,11 @@ bash main_script_polar_all_final_10.sh
 ```
 Similarly, main_script_polar_all_final_20.sh and main_script_polar_all_final_30.sh for 20% and 30% respectively. 
 
+Finally, to run object detection on the reconstructed radar frame and obtain the AP results, run the following:
 
+```
+python3 test.py --folder=$reconstruct_folder --scene=all
+```
 
 
 
