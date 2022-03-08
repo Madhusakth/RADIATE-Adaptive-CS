@@ -28,7 +28,6 @@ To run the proposed algorithm Rad-Info-2,
 
 For 10% sampling: 
 ```
-cd vehicle_detection/src_cs
 bash main_script_polar_all_final_10.sh 
 ```
 Similarly, main_script_polar_all_final_20.sh and main_script_polar_all_final_30.sh for 20% and 30% respectively. 
