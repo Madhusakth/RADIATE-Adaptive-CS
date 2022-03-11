@@ -1,6 +1,6 @@
 echo "-----------started processing first image-----------"
 
-scene='city_7_0'
+scene='city_1_3'
 folder='20-train_polar-reconst-test-10'
 sr=20
 

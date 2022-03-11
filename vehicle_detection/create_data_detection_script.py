@@ -33,7 +33,7 @@ args = parser.parse_args()
 
 # path to the sequence
 root_path = '../data/radiate/'
-sequence_name = 'city_7_0'
+sequence_name = 'city_1_3'
 radar_path = 'Navtech_Polar/radar-cart-img'
 
 net_output = '/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/data/radiate/'+sequence_name+'/20-net_output-rad-train'

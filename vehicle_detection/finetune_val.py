@@ -186,7 +186,7 @@ def train(model_name, root_dir, dataset_mode, max_iter):
     cfg_file = os.path.join('test', 'config', model_name + '.yaml')
     cfg = get_cfg()
 
-    output_dir='/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/vehicle_detection/train_results_polar/fine_tune_100iter_city_1_3_city_7_0_rad_'+str(total_frames)+ '/'
+    output_dir='/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/vehicle_detection/train_results_polar_test/fine_tune_100iter_city_1_3_city_7_0_rad_'+str(total_frames)+ '/'
     os.makedirs(output_dir, exist_ok=True)
 
 
