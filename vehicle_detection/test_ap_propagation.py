@@ -59,7 +59,7 @@ def get_radar_dicts(folders,radar_frame_no):
         idd = 0
         folder_size = len(folders)
         for folder in folders:
-            radar_folder = os.path.join(root_dir, folder,'30-final-rad-info-polar-test-10/radar-cart-img')
+            radar_folder = os.path.join(root_dir, folder,'standard-cs-Gauss-40-img-10/radar-cart-img')
             annotation_path = os.path.join(root_dir,
                                            folder, 'annotations', 'annotations.json')
             with open(annotation_path, 'r') as f_annotation:
@@ -140,13 +140,14 @@ cfg = get_cfg()
 # add project-specific config (e.g., TensorMask) here if you're not running a model in detectron2's core library
 cfg.merge_from_file(os.path.join('test','config' , network + '.yaml'))
 #cfg.MODEL.DEVICE = 'cpu'
-cfg.MODEL.WEIGHTS = os.path.join('weights',  network +'_' + setting + '.pth')
+#cfg.MODEL.WEIGHTS = os.path.join('weights',  network +'_' + setting + '.pth')
+cfg.MODEL.WEIGHTS = 'train_results_latest/faster_rcnn_R_50_FPN_3x_good_and_bad_weather/model_final.pth' 
 #cfg.MODEL.WEIGHTS = 'train_results/finetune_rad_000001lr_80iter_city_1_3_city_7_0/model_final.pth'
 #cfg.MODEL.WEIGHTS = 'train_results/finetune_rad_100lr_200iter_30_rad_info/model_final.pth'
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (vehicle)
 cfg.MODEL.ROI_HEADS.NMS_THRESH_TEST = 0.2
 
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
+#cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
 
 cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[8, 16, 32, 64, 128]]
 predictor = DefaultPredictor(cfg)
@@ -163,11 +164,12 @@ print(folders_test)
 #folders_test=['city_3_7','tiny_foggy','snow_1_0','night_1_4','motorway_2_2'] #'tiny_foggy' #, 'snow_1_0' #, 'night_1_4', 'motorway_2_2','city_3_7']
 print("test folders:", folders_test)
 
-for i in range(20):
-    if i < 18:
-        folders_test=['city_3_7','tiny_foggy','snow_1_0','night_1_4','motorway_2_2']
-    else:
-        folders_test=['city_3_7','snow_1_0','night_1_4','motorway_2_2']
+for i in range(40):
+    #if i < 18:
+    #    folders_test=['city_3_7','tiny_foggy','snow_1_0','night_1_4','motorway_2_2']
+    #else:
+    #    folders_test=['city_3_7','snow_1_0','night_1_4','motorway_2_2']
+    folders_test=['city_3_7','fog_6_0','snow_1_0','night_1_4','motorway_2_2']
     shutil.rmtree('./output')
 
     dataset_test_name = 'test_'+str(i)

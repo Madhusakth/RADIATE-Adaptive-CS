@@ -2,6 +2,9 @@
 
 vehicle_detection/tracking_branch/*
 vehicle_detection/src_cs/tracking_branch/*
+vehicle_detection/src_cs/logs/*
+vehicle_detection/detectron2-test-venv/*
+vehicle_detection/src_cs/non_tracked_files/*
 
 data/*
 vehicle_detection/weights/*

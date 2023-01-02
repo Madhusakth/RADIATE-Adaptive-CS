@@ -41,11 +41,11 @@ radar_path = args.folder+'/radar-cart-img' #'30-final-rad-info-same-meas' #'Navt
 
 
 if args.sr==10:
-    output_folder='10-net_output-polar'
+    output_folder='10-net_output-polar-kalman'
 elif args.sr==20:
-    output_folder='20-net_output-polar'
+    output_folder='20-net_output-polar-kalman'
 else:
-    output_folder='30-net_output-polar'
+    output_folder='30-net_output-polar-kalman'
 
 net_output = '/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/data/radiate/'+sequence_name+'/'+output_folder #10-net_output-polar'
 print(net_output)
@@ -65,9 +65,9 @@ seq = radiate.Sequence(os.path.join(root_path, sequence_name), config_file='/hom
 cfg = get_cfg()
 # add project-specific config (e.g., TensorMask) here if you're not running a model in detectron2's core library
 cfg.merge_from_file(os.path.join('test','config' , network + '.yaml'))
-cfg.MODEL.DEVICE = 'cpu'
+#cfg.MODEL.DEVICE = 'cpu'  #####
 #cfg.MODEL.WEIGHTS = os.path.join('weights',  network +'_' + setting + '.pth')
-cfg.MODEL.WEIGHTS = 'train_results_latest/faster_rcnn_R_50_FPN_3x_good_and_bad_weather/model_final.pth'  #custom trained model 
+cfg.MODEL.WEIGHTS = 'train_results_latest/faster_rcnn_R_50_FPN_3x_good_and_bad_weather/model_final.pth'
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (vehicle)
 cfg.MODEL.ROI_HEADS.NMS_THRESH_TEST = 0.2
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5

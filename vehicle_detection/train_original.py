@@ -1,4 +1,3 @@
-
 import argparse
 
 
@@ -39,7 +38,7 @@ parser.add_argument("--resume", help="Whether to resume training or not",
                     type=bool)
 
 parser.add_argument("--dataset_mode", help="dataset mode ('good_weather', 'good_and_bad_weather')",
-                    default='good_weather',
+                    default='good_and_bad_weather',
                     type=str)
 
 # parse arguments
@@ -54,8 +53,7 @@ max_iter = args.max_iter
 def train(model_name, root_dir, dataset_mode, max_iter):
 
     # output folder to save models
-    output_dir = os.path.join('train_results', model_name + '_' + dataset_mode + '_test')
-    #output_dir='train_results/sample'
+    output_dir = os.path.join('train_results_polar_all', model_name + '_' + dataset_mode)
     os.makedirs(output_dir, exist_ok=True)
 
     # get folders depending on dataset_mode
@@ -96,12 +94,12 @@ def train(model_name, root_dir, dataset_mode, max_iter):
         return min_x, min_y, max_x, max_y
 
     def get_radar_dicts(folders):
-        category_to_id={'pedestrian':0, 'group_of_pedestrians':1, 'bus':2, 'car':3,'van':4,'truck':5,'motorbike':6,'bicycle':7}
         dataset_dicts = []
         idd = 0
         folder_size = len(folders)
         for folder in folders:
-            radar_folder = os.path.join(root_dir, folder, 'Navtech_Cartesian')
+            #radar_folder = os.path.join(root_dir, folder, 'Navtech_Cartesian')
+            radar_folder = os.path.join(root_dir, folder, 'Navtech_Polar/radar-cart-img-all')
             annotation_path = os.path.join(root_dir,
                                            folder, 'annotations', 'annotations.json')
             with open(annotation_path, 'r') as f_annotation:
@@ -109,7 +107,14 @@ def train(model_name, root_dir, dataset_mode, max_iter):
 
             radar_files = os.listdir(radar_folder)
             radar_files.sort()
-            for frame_number in range(len(radar_files)):
+            
+            #for polar img train
+            radar_cart_folder = os.path.join(root_dir, folder, 'Navtech_Cartesian')
+            total_cart_imgs = len(os.listdir(radar_cart_folder))
+            image_total = len(radar_files) if len(radar_files) < total_cart_imgs else total_cart_imgs
+
+
+            for frame_number in range(image_total):
                 record = {}
                 objs = []
                 bb_created = False
@@ -127,8 +132,8 @@ def train(model_name, root_dir, dataset_mode, max_iter):
 
                 for object in annotation:
                     if (object['bboxes'][frame_number]):
-                            class_obj = object['class_name']
-                            #if (class_obj != 'pedestrian' and class_obj != 'group_of_pedestrians'):
+                        class_obj = object['class_name']
+                        if (class_obj != 'pedestrian' and class_obj != 'group_of_pedestrians'):
                             bbox = object['bboxes'][frame_number]['position']
                             angle = object['bboxes'][frame_number]['rotation']
                             bb_created = True
@@ -149,7 +154,7 @@ def train(model_name, root_dir, dataset_mode, max_iter):
                                 obj = {
                                     "bbox": [xmin, ymin, xmax, ymax],
                                     "bbox_mode": BoxMode.XYXY_ABS,
-                                    "category_id": category_to_id[class_obj],#0,
+                                    "category_id": 0,
                                     "iscrowd": 0
                                 }
 
@@ -161,32 +166,32 @@ def train(model_name, root_dir, dataset_mode, max_iter):
 
     dataset_train_name = dataset_mode + '_train'
     dataset_test_name = dataset_mode + '_test'
-    #print(folders_train)
 
     DatasetCatalog.register(dataset_train_name,
                             lambda: get_radar_dicts(folders_train))
-    MetadataCatalog.get(dataset_train_name).set(thing_classes=["pedestrian", "group_of_pedestrians", "bus", "car","van","truck","motorbike","bicycle"])#["vehicle"])
+    MetadataCatalog.get(dataset_train_name).set(thing_classes=["vehicle"])
 
     DatasetCatalog.register(dataset_test_name,
                             lambda: get_radar_dicts(folders_test))
-    MetadataCatalog.get(dataset_test_name).set(thing_classes=["pedestrian", "group_of_pedestrians", "bus", "car","van","truck","motorbike","bicycle"])#["vehicle"])
+    MetadataCatalog.get(dataset_test_name).set(thing_classes=["vehicle"])
 
     cfg_file = os.path.join('test', 'config', model_name + '.yaml')
     cfg = get_cfg()
     cfg.OUTPUT_DIR = output_dir
-    #'''
     cfg.merge_from_file(cfg_file)
     cfg.DATASETS.TRAIN = (dataset_train_name,)
     cfg.DATASETS.TEST = (dataset_test_name,)
     cfg.DATALOADER.NUM_WORKERS = 2
-    cfg.SOLVER.IMS_PER_BATCH = 4
+    cfg.SOLVER.IMS_PER_BATCH = 2
     cfg.SOLVER.STEPS: (25000, 35000)
     cfg.SOLVER.MAX_ITER = max_iter
-    cfg.SOLVER.BASE_LR = 0.00025*2
+    cfg.SOLVER.BASE_LR = 0.00025
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 8
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
     cfg.MODEL.ROI_HEADS.NMS_THRESH_TEST = 0.2
     cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[8, 16, 32, 64, 128]]
+
+    cfg.TEST.EVAL_PERIOD = 10000
 
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     if cfg.MODEL.PROPOSAL_GENERATOR.NAME == "RRPN":
@@ -196,30 +201,6 @@ def train(model_name, root_dir, dataset_mode, max_iter):
 
     trainer.resume_or_load(resume=resume)
     trainer.train()
-    #'''
-
-    '''
-    from detectron2.engine import DefaultPredictor
-    network = 'faster_rcnn_R_50_FPN_3x' 
-    cfg.MODEL.WEIGHTS = '/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/vehicle_detection/weights/faster_rcnn_R_50_FPN_3x_good_and_bad_weather_radar.pth' #os.path.join(cfg.OUTPUT_DIR, "model_final.pth")  # path to the model we just trained
-    cfg.merge_from_file(os.path.join('test','config' , network + '.yaml'))
-    cfg.MODEL.DEVICE = 'cpu'
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 9 #1  # only has one class (vehicle)
-    cfg.MODEL.ROI_HEADS.NMS_THRESH_TEST = 0.2
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
-    cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[8, 16, 32, 64, 128]]
-    '''
-    predictor = DefaultPredictor(cfg)
-
-    dataset_test_name = 'test'
-
-
-    from detectron2.evaluation import COCOEvaluator, inference_on_dataset
-    from detectron2.data import build_detection_test_loader
-    evaluator = COCOEvaluator(dataset_test_name,cfg,False, output_dir="./output")
-    val_loader = build_detection_test_loader(cfg, dataset_test_name)
-    print(inference_on_dataset(predictor.model, val_loader, evaluator))
-    #'''
 
 
 if __name__ == "__main__":

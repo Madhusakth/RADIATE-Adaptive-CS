@@ -7,13 +7,13 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
     saveDir= char(strcat(myDir,'/',radar_output))
     
     if sr==10
-    	point_radDir = char(strcat(myDir,'/10-net_output_idx-polar/'))
+    	point_radDir = char(strcat(myDir,'/10-net_output_idx-polar-kalman/'))
 	samp_rate=0.1
     elseif sr==20
-    	point_radDir = char(strcat(myDir,'/20-net_output_idx-polar/'))
+    	point_radDir = char(strcat(myDir,'/20-net_output_idx-polar-kalman/'))
 	samp_rate=0.2
     else
-	point_radDir = char(strcat(myDir,'/30-net_output_idx-polar/'))    
+	point_radDir = char(strcat(myDir,'/30-net_output_idx-polar-kalman/'))    
 	samp_rate=sr*0.01
     end
 
@@ -27,7 +27,7 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
 
     obj_file = myFiles(k-1).name;
     obj_file;
-    pcd_file = char(strcat(int2str(k-1),'_'));
+    pcd_file = char(strcat(int2str(k-1),'_'))
     pcd_row_file = strcat(point_radDir, pcd_file, 'row');
     pcd_row = load(pcd_row_file);
     pcd_rows = pcd_row.obj_rows;
@@ -39,8 +39,8 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
     pcd_columns = pcd_column.obj_columns;
     pcd_columns = pcd_columns + 1;
 
-    length(pcd_rows);
-    length(pcd_columns);
+    length(pcd_rows)
+    length(pcd_columns)
     
     
     disp(fullFileName)
@@ -57,7 +57,7 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
 
     uniform = 0;
     if length(pcd_rows) == 0
-	%samp_rate=0.8 %%%%%%%%%%%%%%%%%%%%%%%%%%
+	%samp_rate = 0.8 %%%%%%%%%%%%%%%%%%
         I = eye(w*h);
         I = I(1:floor(samp_rate*w*h),1:w*h);
         cols = size(I,2);
@@ -65,14 +65,14 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
         Phi = I(:,P);
         uniform = 1;
 	rate = samp_rate*w*h;
-        %disp('************ Uniform sampling ************ override 80% %%%%%%%%%%%%%%');
+        %disp('************ Uniform sampling ************ override 80% *************');
     end
     if uniform == 0
     
     	Imp = length(pcd_rows)
 	disp('calculate LP')
 
-    	Other = 240 - Imp;
+    	Other = 240 - Imp
 
 
 	if sr==10
@@ -171,6 +171,6 @@ function compressed_sensing_radar_pcd_bash_polar(k,scene,radar_output,sr)
     
     baseFileName = strrep(baseFileName, '.png', '.mat');
     fullFileNameRecons = fullfile(saveDir, baseFileName);
-    save(fullFileNameRecons, 'snrs', 'MAEs');
+    save(fullFileNameRecons, 'snrs', 'MAEs')
 exit
 end

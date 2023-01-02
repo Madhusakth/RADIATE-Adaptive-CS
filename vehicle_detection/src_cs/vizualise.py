@@ -20,11 +20,11 @@ else:
 
 #scene = 3
 
-scene = 'city_3_7'
+scene = 'tiny_foggy'
 data_dir_image_info = '/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/data/radiate/'+scene+'/20-final-rad-info-polar-test-10/radar-cart-img_annotated_nw_orig/' 
 data_dir_original = '/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/data/radiate/'+scene+'/Navtech_Polar/radar-cart-img_annotated_nw_orig/'
 data_dir_sparse = '/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/data/radiate/'+scene+'/reconstruct-polar-same-meas-20/radar-cart-img_annotated_nw_orig/'#reconstruct-same-meas-20_annotated/'#reconstruct/reshaped_annotated/'
-data_dir_prev_info = '/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/data/radiate/'+scene+'/20-final-rad-info-polar-test-12/radar-cart-img_annotated_nw_orig/'
+data_dir_prev_info = '/home/ms75986/Desktop/Qualcomm/RADIATE/radiate_sdk/data/radiate/'+scene+'/20-final-rad-info-polar-kalman-3/radar-cart-img_annotated_nw_orig/'
 
 
 data_path = os.path.join(data_dir_image_info,'*png')

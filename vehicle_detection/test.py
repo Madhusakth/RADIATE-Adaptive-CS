@@ -28,9 +28,11 @@ import argparse
 parser = argparse.ArgumentParser(description='Arguments for detectron')
 parser.add_argument('--scene',type=str, default = 'tiny_foggy', help='data scene number')
 parser.add_argument('--folder',type=str, default ='Navtech_Cartesian', help='front data for True and rear data for False')
+parser.add_argument('--total',type=int, default =20, help='Total images per scene')
+parser.add_argument('--ckpt',type=str, default ='default', help='checkpoint for eval')
 args = parser.parse_args()
 
-
+debug = False
 root_dir = '../data/radiate/'
 
 def gen_boundingbox(bbox, angle):
@@ -72,13 +74,22 @@ def get_radar_dicts(folders,curr_dir):
 
             radar_files = os.listdir(radar_folder)
             radar_files.sort()
-            for frame_number in range(len(radar_files)):
+            
+            if args.scene=='ALL':
+                radar_cart_folder = os.path.join(root_dir, folder, 'Navtech_Cartesian')
+                total_cart_imgs = len(os.listdir(radar_cart_folder))
+                total_images = len(radar_files) if len(radar_files) < total_cart_imgs else total_cart_imgs
+            else:
+                total_images = args.total
+            for frame_number in range(total_images):
+            #for frame_number in range(len(radar_files)):
                 record = {}
                 objs = []
                 bb_created = False
                 idd += 1
                 filename = os.path.join(
                     radar_folder, radar_files[frame_number])
+                #print(filename)
 
                 if (not os.path.isfile(filename)):
                     print(filename)
@@ -88,7 +99,8 @@ def get_radar_dicts(folders,curr_dir):
                 record["height"] = 1152
                 record["width"] = 1152
 
-
+                if debug:
+                    print("folder:", filename, frame_number)
                 for object in annotation:
                     if (object['bboxes'][frame_number]):
                             class_obj = object['class_name']
@@ -130,7 +142,8 @@ def get_radar_dicts(folders,curr_dir):
 
 
 
-network = 'faster_rcnn_R_50_FPN_3x'
+network = 'faster_rcnn_R_50_FPN_3x'   #########
+#network = 'faster_rcnn_R_101_FPN_3x'
 setting = 'good_and_bad_weather_radar'
 
 # time (s) to retrieve next frame
@@ -141,15 +154,23 @@ cfg = get_cfg()
 # add project-specific config (e.g., TensorMask) here if you're not running a model in detectron2's core library
 cfg.merge_from_file(os.path.join('test','config' , network + '.yaml'))
 #cfg.MODEL.DEVICE = 'cpu'
-cfg.MODEL.WEIGHTS = os.path.join('weights',  network +'_' + setting + '.pth')
-#cfg.MODEL.WEIGHTS = 'train_results_polar/fine_tune_100iter_city_1_3_city_7_0_rad_200/model_final.pth' 
+
+if args.ckpt == 'default':
+    cfg.MODEL.WEIGHTS = os.path.join('weights',  network +'_' + setting + '.pth')
+else:
+    cfg.MODEL.WEIGHTS = args.ckpt
+print("Inference model:", cfg.MODEL.WEIGHTS)
+#cfg.MODEL.WEIGHTS = 'train_results_latest/faster_rcnn_R_50_FPN_3x_good_and_bad_weather/model_final.pth'
+#cfg.MODEL.WEIGHTS = 'train_results/faster_rcnn_trained/model_final.pth'
+#cfg.MODEL.WEIGHTS = 'train_results_polar/fine_tune_100iter_city_1_3_city_7_0_rad_200/model_final.pth' ###
 #cfg.MODEL.WEIGHTS = 'train_results/finetune_rad_000001lr_80iter_city_1_3_city_7_0/model_final.pth'
 #cfg.MODEL.WEIGHTS = 'train_results/finetune_rad_100lr_200iter_30_rad_info/model_final.pth'
+
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (vehicle)
 
 cfg.MODEL.ROI_HEADS.NMS_THRESH_TEST = 0.2
 
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
+#cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5 #0.05 #0.05   #############
 
 cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[8, 16, 32, 64, 128]]
 predictor = DefaultPredictor(cfg)
@@ -164,17 +185,35 @@ for curr_dir in os.listdir(root_dir):
         folders_test.append(curr_dir)
 print(folders_test)
 
-if args.scene== 'all':
-    folders_test = ['city_3_7','tiny_foggy','snow_1_0','night_1_4','motorway_2_2']
+
+import torch
+state_dict = torch.load(cfg.MODEL.WEIGHTS)
+params = 0
+for key in state_dict['model']:
+	if 'weight' in key:
+		params += state_dict['model'][key].numel()
+
+print(params)
+
+#'''
+if args.scene == 'ALL':
+    folders_test = folders_test
+    folders_test.remove('tiny_foggy')
+elif args.scene== 'all':
+    folders_test = ['city_3_7','fog_6_0','snow_1_0','night_1_4','motorway_2_2'] #tiny_foggy
+    #folders_test = ['rain_3_0','night_1_5','rain_4_0']
 else:
     folders_test=[args.scene]
-
+#'''
 
 print("test folders:", folders_test)
 dataset_test_name = 'test'
 
-curr_dir = args.folder + '/radar-cart-img'
-
+if args.scene == 'ALL' and args.folder=='Navtech_Cartesian':# or args.total >20:
+    curr_dir = args.folder
+else:
+    curr_dir = args.folder + '/radar-cart-img'   ##############
+print("curr_dir:", curr_dir)
 DatasetCatalog.register(dataset_test_name,
                             lambda: get_radar_dicts(folders_test,curr_dir))
 MetadataCatalog.get(dataset_test_name).set(thing_classes=["vehicle"])

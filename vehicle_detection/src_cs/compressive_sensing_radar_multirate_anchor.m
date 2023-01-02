@@ -1,16 +1,10 @@
 %clear, close all, clc;
-function compressive_sensing_radar_radiate_polar() 
+function compressive_sensing_radar_multirate_anchor(k,scene,radar_output,sr) 
 
-scenes={'city_3_7','night_1_4', 'motorway_2_2','snow_1_0','fog_6_0'}
-%scenes={'fog_6_0'}
-
-samp_rate = 0.20;
-
-for scene_num=1:length(scenes)
-	scene = scenes{scene_num}
-
-	myDir= char(strcat('../../data/radiate/',scene,'/Navtech_Polar'))
-	saveDir=char(strcat('../../data/radiate/',scene,'/standard-cs-BPD-40-img-20-1'))
+	disp('**** compressive_sensing_radar_multirate anchor ****');
+        samp_rate=sr/100
+	myDir= char(strcat('../../data/radiate/',scene,'/Navtech_Polar'));
+	saveDir=char(strcat('../../data/radiate/',scene,'/',radar_output))
 
 
 	myFiles = dir(fullfile(myDir,'*.png'));
@@ -21,8 +15,7 @@ for scene_num=1:length(scenes)
 	    end
 
 
-	for current = 1:41 %40 %parallel
-	    baseFileName = myFiles(current).name;
+	    baseFileName = myFiles(k).name;
 	    fullFileName = fullfile(myDir, baseFileName);
 	    disp(fullFileName)
 	    A = imread(fullFileName);
@@ -33,44 +26,11 @@ for scene_num=1:length(scenes)
 	    h = 48; 
 	    rate = double(int16((w*h)*samp_rate));
 
-	    meas='BPD';
-
-
-	    if strcmp(meas,'gauss')
-		
-		Phi = randn(floor(samp_rate*w*h),w*h);
-		if current == 1
-		   disp('gauss matrix');
-		   size(Phi)
-		end
-
-	    elseif strcmp(meas,'BPD')
-		I = eye(w*h);
-		I = I(1:floor(samp_rate*w*h),1:w*h);
-		cols = size(I,2);
-		P = randperm(cols);
-		Phi = I(:,P);
-		disp('BPD matrix');
-
-	    else
-		rate = samp_rate*w*h;
-		n = w*h;
-		Phi = zeros(rate,n);
-		num = floor(n/rate);
-		for i = 1:rate
-			Phi(i, (i-1)*num+1: (i-1)*num + num) = 1;
-		end
-		cols = size(Phi,2);
-		P = randperm(cols);
-		Phi = Phi(:,P);
-		disp('BPBD matrix');
-	    end
-		
-	    %I = eye(w*h);
-	    %I = I(1:floor(samp_rate*w*h),1:w*h);
-	    %cols = size(I,2);
-	    %P = randperm(cols);
-	    %Phi = I(:,P);
+	    I = eye(w*h);
+	    I = I(1:floor(samp_rate*w*h),1:w*h);
+	    cols = size(I,2);
+	    P = randperm(cols);
+	    Phi = I(:,P);
 
 	    snrs = [];
 	    MAEs = [];
@@ -84,7 +44,14 @@ for scene_num=1:length(scenes)
 		for d = 1:length(columns)-1
 		    final_rate = final_rate + rate;
 		    A_ = A([rows(c):rows(c+1)-1],[columns(d):columns(d+1)-1]);
-		    x1 = compressed_sensing_example_parallel(A_, w, h, rate,Phi); %%%%
+		    %x1 = compressed_sensing_example_parallel(A_, w, h, rate,Phi); %%%%
+		    %quantization
+		    max_val = double(max(A_,[],'all'));
+		    x1 = round((double(A_)/max_val)*7);
+		    x1 = x1*(max_val/7);
+		    numel(unique(x1));
+		    %x1 = round((8-1)*(A_/255));
+		    %x1 = 255*(1/7)*x1
 		    x1 = uint8(x1);
 		    peak = psnr(A_,x1);
 		    snrs = [snrs;peak];
@@ -95,6 +62,7 @@ for scene_num=1:length(scenes)
 		end
 		final_A = vertcat(final_A, final_A_column);        
 	    end
+	    numel(unique(x1))
 	    final_rate
 	    final_A = final_A.';
 	    [recons_h, recons_w] = size(final_A);
@@ -110,8 +78,5 @@ for scene_num=1:length(scenes)
 	    save(fullFileNameRecons, 'snrs', 'MAEs')
 	    mean(snrs)
 	    mean(MAEs)
-
-	end
-end
-
+exit
 end

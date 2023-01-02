@@ -2,12 +2,12 @@ from python import radar
 import matplotlib.pyplot as plt
 import glob
 import os
-import imageio
+#import imageio
 import cv2
 import numpy as np
 import scipy.io as sio
 from scripts.cfar import detect_peaks
-from skimage import io
+#from skimage import io
 from scipy import ndimage
 from scipy.signal import find_peaks
 import pickle
@@ -26,14 +26,14 @@ args = parser.parse_args()
 sequence = args.scene #'city_3_7'
 
 if args.sr==10:
-    input_folder='10-net_output-polar'
-    output_folder='10-net_output_idx-polar'
+    input_folder='10-net_output-polar-yolov5'
+    output_folder='10-net_output_idx-polar-yolov5'
 elif args.sr==20:
-    input_folder='20-net_output-polar'
-    output_folder='20-net_output_idx-polar'
+    input_folder='20-net_output-polar-yolov5'
+    output_folder='20-net_output_idx-polar-yolov5'
 else:
-    input_folder='30-net_output-polar'
-    output_folder='30-net_output_idx-polar'
+    input_folder='30-net_output-polar-yolov5'
+    output_folder='30-net_output_idx-polar-yolov5'
 
 
 
@@ -57,10 +57,12 @@ obj_columns = []
 objs = []
 
 
-dx_9 = [-1,0,1]
+dx_9 = [-1,0,1]#,2]  #[-1,0,1]
+#dx_9 = [-1,0]  #occluded ablation
 dy_9 = [-1,0,1]
 
-dx_25 = [-2,-1,0,1,2]
+dx_25 = [-2,-1,0,1,2]#,3]  #[-2,-1,0,1,2]
+#dx_25 = [-2,-1,0] #occluded ablation
 dy_25 = [-2,-1,0,1,2]
 
 dx_angle = [-1,0]

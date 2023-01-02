@@ -2,7 +2,7 @@ from python import radar
 import matplotlib.pyplot as plt
 import glob
 import os
-import imageio
+#import imageio
 import cv2
 import numpy as np
 import scipy.io as sio
@@ -37,7 +37,7 @@ files = glob.glob(data_path)
 files = sorted(files)
 if not os.path.isdir(save_dir):
     os.mkdir(save_dir)
-
+#print(files)
 #for num,images in enumerate(files):
 if len(files)!=0:
     images = files[args.radar_id-1]
