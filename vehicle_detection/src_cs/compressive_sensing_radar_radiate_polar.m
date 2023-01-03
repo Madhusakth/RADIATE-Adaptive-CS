@@ -5,6 +5,7 @@ scenes={'city_3_7','night_1_4', 'motorway_2_2','snow_1_0','fog_6_0'}
 %scenes={'fog_6_0'}
 
 samp_rate = 0.20;
+meas = 'BPD';
 
 for scene_num=1:length(scenes)
 	scene = scenes{scene_num}
@@ -33,7 +34,6 @@ for scene_num=1:length(scenes)
 	    h = 48; 
 	    rate = double(int16((w*h)*samp_rate));
 
-	    meas='BPD';
 
 
 	    if strcmp(meas,'gauss')
