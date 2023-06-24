@@ -34,6 +34,9 @@ bash main_multirate_kalman_20.sh
 
 ```
 bash main_yolov5_multirate_20.sh
+bash  coco_to_yolo.sh
+cd yolov5
+python3 val.py --data=data/radcoco.yaml --weights=runs/train/exp7/weights/best.pt --imgsz=1280 --batch-size=
 ```
 
 6. Multirate YoloV5 based RADAR compression with tracking:
