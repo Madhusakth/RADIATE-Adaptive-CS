@@ -56,6 +56,9 @@ Finally, we also tested with DeforDETR model:
 ```
 bash main_DeforDETR_multirate_20.sh
 main_DeforDETR_multirate_kalman_20.sh
+
+
+References: https://tsaith.github.io/detect-peaks-with-cfar-algorithm.html
 ```
 
 
